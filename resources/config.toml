@@ -1,0 +1,102 @@
+# Oxide Monitor - portable sample configuration.
+#
+# Copy this file next to oxide-monitor.exe (portable mode) or to
+# %APPDATA%\OxideMonitor\config.toml. A config.toml beside the executable is
+# picked up automatically; set OXIDE_PORTABLE=1 to force portable mode.
+#
+# All external sensor providers are disabled here, so CPU temperature is shown
+# as an em dash unless a provider is enabled below.
+
+version = 1
+
+[general]
+language = "uk"
+autostart = false
+# Reserved for the settings UI. The built-in dark palette uses a #202020
+# background with light label/value text and dark-friendly item colors.
+theme = "dark"
+# "auto" | "acpi" | "provider" | "off". "auto" prefers a provider and
+# falls back to the ACPI platform zone (labelled with `~`), never to a guess.
+cpu_temp_source = "auto"
+gpu_poll_ms = 3000
+# disk_index = 0
+# adapter = "Ethernet"
+
+[taskbar]
+show = true
+width = 294
+height = 35
+x_offset = 0
+y_offset = 0
+opacity = 235
+font_name = "Segoe UI"
+font_size = 8
+rows = 2
+item_space = 6
+
+[format]
+unit_byte = false
+speed_unit = "mbps"   # auto | kbps | mbps
+digits = 4
+hide_unit = false
+hide_percent = false
+separate_space = true
+short_mode = false
+
+[providers]
+hwinfo = false
+lhm_http = false
+lhm_auto_update = false
+pawnio = false
+helper = false
+lhm_url = "http://127.0.0.1:8085/metrics"
+
+# Eight items in two rows: up/down, CPU %, MEM %, GPU %,
+# CPU temp, GPU temp, NVMe/HDD temp.
+[[items]]
+id = "up"
+label = "↑"
+visible = true
+color = "#7FD37F"
+
+[[items]]
+id = "down"
+label = "↓"
+visible = true
+color = "#7FD37F"
+
+[[items]]
+id = "cpu"
+label = "CPU:"
+visible = true
+color = "#F0C674"
+
+[[items]]
+id = "memory"
+label = "MEM:"
+visible = true
+color = "#F0C674"
+
+[[items]]
+id = "gpu"
+label = "GPU:"
+visible = true
+color = "#7FBFEF"
+
+[[items]]
+id = "cpu_temp"
+label = "CPU:"
+visible = true
+color = "#F0A050"
+
+[[items]]
+id = "gpu_temp"
+label = "GPU:"
+visible = true
+color = "#7FBFEF"
+
+[[items]]
+id = "hdd_temp"
+label = "HDD:"
+visible = true
+color = "#E08080"

@@ -1,0 +1,53 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/oxide-core",
+    "crates/oxide-autostart",
+    "crates/oxide-ipc",
+    "crates/oxide-render",
+    "crates/oxide-sensors",
+    "crates/oxide-gpu",
+    "crates/oxide-providers",
+    "crates/oxide-ui",
+    "crates/oxide-app",
+    "crates/oxide-settings",
+    "crates/oxide-pawnio-host",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Oxide Monitor contributors"]
+description = "Lightweight, driver-free taskbar system monitor for Windows 10/11"
+repository = "https://github.com/edhases/oxide-monitor"
+
+[workspace.dependencies]
+oxide-core = { path = "crates/oxide-core" }
+oxide-autostart = { path = "crates/oxide-autostart" }
+oxide-ipc = { path = "crates/oxide-ipc" }
+oxide-render = { path = "crates/oxide-render" }
+oxide-sensors = { path = "crates/oxide-sensors" }
+oxide-gpu = { path = "crates/oxide-gpu" }
+oxide-providers = { path = "crates/oxide-providers" }
+oxide-ui = { path = "crates/oxide-ui" }
+oxide-pawnio-host = { path = "crates/oxide-pawnio-host" }
+
+windows = { version = "0.62", default-features = false }
+serde = { version = "1", features = ["derive"] }
+toml = "1.2"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-appender = "0.2"
+ureq = { version = "3.5", default-features = false }
+serde_json = "1"
+fluent-bundle = "0.16"
+unic-langid = { version = "0.9", features = ["macros"] }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "unwind"

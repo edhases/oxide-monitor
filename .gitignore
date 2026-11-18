@@ -1,0 +1,34 @@
+# Rust / Cargo
+/target/
+**/*.rs.bk
+**/*.pdb
+**/*.dmp
+**/*.log
+**/*.etl
+
+# Local experiments and spike artifacts (official module binaries, logs)
+/spike/
+
+# Builds / packages
+/dist/
+*.exe
+*.dll
+*.zip
+*.7z
+*.bak
+*.tmp
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local agent instructions / internal test logs / machine-specific files
+AGENTS.md
+/docs/INTEGRATION.md
+.env
+.env.*
+*.local
+*.local.*
+

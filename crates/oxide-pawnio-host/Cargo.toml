@@ -1,0 +1,31 @@
+[package]
+name = "oxide-pawnio-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "oxide_pawnio_host"
+path = "src/lib.rs"
+
+[[bin]]
+name = "oxide-pawnio-host"
+path = "src/main.rs"
+test = false
+
+[dependencies]
+oxide-core.workspace = true
+oxide-ipc.workspace = true
+windows = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Cryptography",
+    "Win32_Security_WinTrust",
+    "Win32_System_LibraryLoader",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Registry",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+thiserror.workspace = true

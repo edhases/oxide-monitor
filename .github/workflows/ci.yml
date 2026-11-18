@@ -1,0 +1,129 @@
+name: CI
+
+# Windows-only project: x64 is the shipped target, ARM64 is compile-checked
+# (no ARM64 packaging yet; see docs/ARM64.md).
+#
+# Gates:
+#   - rustfmt on the whole workspace
+#   - x64: cargo check --all-targets, cargo test, cargo clippy (advisory)
+#   - ARM64: cargo check only; no ARM64 linker or Windows SDK ARM64 libs needed
+#
+# No admin rights, vendor DLLs (NVML/ADLX), or physical GPU are required: all
+# sensor backends are optional at runtime and unit tests never touch hardware.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  fmt:
+    name: Format (rustfmt)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable (MSVC) with rustfmt
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: cargo fmt --all -- --check
+        run: cargo fmt --all -- --check
+
+  x64:
+    name: Build & test (x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable (MSVC) with clippy
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: cargo check --workspace --all-targets
+        run: cargo check --workspace --all-targets
+
+      - name: cargo test --workspace
+        run: cargo test --workspace
+
+      - name: Dependency isolation audit (oxide-app clean, oxide-settings DX12-only)
+        shell: pwsh
+        run: |
+          $badApp = cargo tree -p oxide-app | Select-String -Pattern "\b(egui|eframe|wgpu|glow|ash|vulkan|oxide-settings)\b"
+          if ($badApp) { Write-Error "Forbidden dependency in oxide-app: $badApp"; exit 1 }
+          # oxide-autostart is intentionally linked into the monitor (Task Scheduler COM,
+          # no GUI/GPU dependencies). Settings must never link it or a backend crate.
+          $badSet = cargo tree -p oxide-settings | Select-String -Pattern "\b(glow|egui_glow|glutin|ash|vulkan|khronos|gles|oxide-ui|oxide-sensors|oxide-gpu|oxide-providers|oxide-autostart)\b"
+          if ($badSet) { Write-Error "Forbidden dependency in oxide-settings: $badSet"; exit 1 }
+          Write-Host "Dependency isolation audit passed."
+
+      # Advisory: pre-existing warnings in the core crates must not make CI red.
+      # The warning count is reported in the job summary; lint errors still fail.
+      - name: cargo clippy --workspace --all-targets (advisory)
+        shell: pwsh
+        run: |
+          # Disable ANSI colors so the warning count is not confused by escapes.
+          $env:CARGO_TERM_COLOR = "never"
+          $log = Join-Path $env:RUNNER_TEMP "clippy.log"
+          cargo clippy --workspace --all-targets 2>&1 | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          $warnings = @(Select-String -Path $log -Pattern '^warning: [^`]').Count
+          "### Clippy (advisory)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "Exit code: ``$code``; warning lines: ``$warnings``. Warnings do not fail the build." |
+            Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          if ($code -ne 0) { exit $code }
+
+  arm64:
+    name: Check (ARM64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable (MSVC) with the ARM64 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-pc-windows-msvc
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-arm64-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-arm64-
+            ${{ runner.os }}-cargo-
+
+      # Check-only: linking an ARM64 binary needs the MSVC ARM64 build tools and
+      # ARM64 Windows SDK libraries, which are not part of the CI gate. Build
+      # scripts still run (winres/rc.exe are host tools and already verified).
+      - name: cargo check --workspace --target aarch64-pc-windows-msvc
+        run: cargo check --workspace --target aarch64-pc-windows-msvc
