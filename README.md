@@ -43,6 +43,18 @@ providers or an explicitly enabled PawnIO CPU-temperature helper.
 - No administrator rights for normal use. PawnIO, if enabled, requires a one-time
   administrator/UAC approval for its helper; PawnIO itself is installed manually.
 
+## Install (Windows)
+
+Download the latest `OxideMonitor-<version>-Setup.exe` from
+[GitHub Releases](https://github.com/edhases/oxide-monitor/releases). The installer is
+**per-user and does not require administrator rights**; it installs to
+`%LOCALAPPDATA%\OxideMonitor`, creates Start Menu shortcuts and an uninstaller. A portable
+ZIP (`oxide-monitor-<version>-win-x64.zip`) is available from the same release.
+
+The binaries and installer are **unsigned**. Windows SmartScreen may warn; verify the
+SHA-256 against the release's `SHA256SUMS` asset before running. PawnIO and
+LibreHardwareMonitor are not bundled.
+
 ## Build and run
 
 ```powershell

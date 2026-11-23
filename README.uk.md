@@ -44,6 +44,17 @@ HWiNFO/LHM або явно ввімкнений PawnIO-хелпер для CPU.
 - Для звичайної роботи адмін-права не потрібні. PawnIO, якщо ввімкнено, вимагає
   одноразового підтвердження admin/UAC для хелпера; сам PawnIO встановлюється вручну.
 
+## Встановлення (Windows)
+
+Завантаж останній `OxideMonitor-<version>-Setup.exe` з
+[GitHub Releases](https://github.com/edhases/oxide-monitor/releases). Інсталятор
+**per-user і не потребує прав адміністратора**; ставить у
+`%LOCALAPPDATA%\OxideMonitor`, створює ярлики в Start Menu та uninstaller. Портативний
+ZIP (`oxide-monitor-<version>-win-x64.zip`) є в тому ж релізі.
+
+Бінарники та інсталятор **unsigned**. Windows SmartScreen може попередити; перевір
+SHA-256 з asset `SHA256SUMS` перед запуском. PawnIO і LibreHardwareMonitor не бандляться.
+
 ## Збірка і запуск
 
 ```powershell
